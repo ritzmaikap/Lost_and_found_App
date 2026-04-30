@@ -8,12 +8,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 /*
     DatabaseHelper manages the SQLite database.
-    Subtask 1 adds the category column and category filter query.
+    Subtask 1 added category filtering.
+    Subtask 2 adds image storage using image URI text.
 */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "LostFound.db";
-    private static final int DATABASE_VERSION = 1;
+
+    // Version increased because image_uri column is added
+    private static final int DATABASE_VERSION = 2;
 
     private static final String TABLE_NAME = "adverts";
 
@@ -32,7 +35,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "phone TEXT, " +
                 "description TEXT, " +
                 "date TEXT, " +
-                "location TEXT)";
+                "location TEXT, " +
+                "image_uri TEXT)";
 
         db.execSQL(createTable);
     }
@@ -44,10 +48,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Insert a new lost/found advert
+    // Insert a new lost/found advert with image URI
     public boolean insertAdvert(String postType, String category, String name,
                                 String phone, String description,
-                                String date, String location) {
+                                String date, String location,
+                                String imageUri) {
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -59,6 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("description", description);
         values.put("date", date);
         values.put("location", location);
+        values.put("image_uri", imageUri);
 
         long result = db.insert(TABLE_NAME, null, values);
 
