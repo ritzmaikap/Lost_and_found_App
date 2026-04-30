@@ -16,7 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "LostFound.db";
 
     // Version increased because image_uri column is added
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String TABLE_NAME = "adverts";
 
@@ -34,9 +34,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "name TEXT, " +
                 "phone TEXT, " +
                 "description TEXT, " +
-                "date TEXT, " +
+                "date TEXT, " + // existing (user input)
                 "location TEXT, " +
-                "image_uri TEXT)";
+                "image_uri TEXT, " +
+                "timestamp TEXT)";   // NEW
 
         db.execSQL(createTable);
     }
@@ -52,7 +53,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public boolean insertAdvert(String postType, String category, String name,
                                 String phone, String description,
                                 String date, String location,
-                                String imageUri) {
+                                String imageUri, String timestamp) {
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -65,6 +66,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("date", date);
         values.put("location", location);
         values.put("image_uri", imageUri);
+        values.put("timestamp", timestamp); // NEW
 
         long result = db.insert(TABLE_NAME, null, values);
 
