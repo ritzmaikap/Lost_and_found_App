@@ -1,8 +1,10 @@
 package com.example.lost_and_found_app;
 
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -10,12 +12,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 /*
     This activity shows one selected advert in detail.
+    Subtask 2 displays the uploaded image for the advert.
     The remove button deletes the advert from SQLite.
 */
 public class ItemDetailActivity extends AppCompatActivity {
 
     TextView txtItemDetails;
+    ImageView imgItemDetail;
     Button btnRemove;
+
     DatabaseHelper databaseHelper;
     int advertId;
 
@@ -26,6 +31,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         // Linking XML views with Java variables
         txtItemDetails = findViewById(R.id.txtItemDetails);
+        imgItemDetail = findViewById(R.id.imgItemDetail);
         btnRemove = findViewById(R.id.btnRemove);
 
         // Creating database helper object
@@ -60,6 +66,12 @@ public class ItemDetailActivity extends AppCompatActivity {
             String description = cursor.getString(cursor.getColumnIndexOrThrow("description"));
             String date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
             String location = cursor.getString(cursor.getColumnIndexOrThrow("location"));
+            String imageUri = cursor.getString(cursor.getColumnIndexOrThrow("image_uri"));
+
+            // Displaying uploaded image
+            if (imageUri != null && !imageUri.isEmpty()) {
+                imgItemDetail.setImageURI(Uri.parse(imageUri));
+            }
 
             String details =
                     postType + " " + name + "\n\n" +

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Detail screen based on the fourth wireframe.
-    User can remove the advert after the owner is found.
+    Subtask 2 shows the uploaded image for the advert.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -9,6 +9,16 @@
     android:orientation="vertical"
     android:padding="22dp"
     android:background="#FFFFFF">
+
+    <!-- Uploaded image for selected lost/found item -->
+    <ImageView
+        android:id="@+id/imgItemDetail"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginBottom="16dp"
+        android:background="#DDDDDD"
+        android:scaleType="centerCrop"
+        android:contentDescription="Uploaded item image" />
 
     <!-- Full advert details -->
     <TextView

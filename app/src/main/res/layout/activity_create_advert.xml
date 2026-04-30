@@ -126,6 +126,30 @@
             android:layout_height="wrap_content"
             android:hint="Enter location" />
 
+        <!-- Image upload section required for Subtask 2 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Item Image:"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp" />
+
+        <ImageView
+            android:id="@+id/imgSelectedItem"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="8dp"
+            android:background="#DDDDDD"
+            android:scaleType="centerCrop"
+            android:contentDescription="Selected item image" />
+
+        <Button
+            android:id="@+id/btnChooseImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="UPLOAD IMAGE"
+            android:layout_marginTop="10dp" />
+
         <!-- Save button -->
         <Button
             android:id="@+id/btnSave"

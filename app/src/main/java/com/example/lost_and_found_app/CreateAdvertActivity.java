@@ -1,26 +1,46 @@
 package com.example.lost_and_found_app;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 /*
     This activity allows the user to create a lost or found advert.
-    Subtask 1 adds category selection so adverts can be filtered later.
+    Subtask 1 added category selection.
+    Subtask 2 requires the user to upload an image before saving the advert.
 */
 public class CreateAdvertActivity extends AppCompatActivity {
 
     RadioButton radioLost, radioFound;
     Spinner spinnerCategory;
     EditText editName, editPhone, editDescription, editDate, editLocation;
-    Button btnSave;
+    Button btnSave, btnChooseImage;
+    ImageView imgSelectedItem;
+
     DatabaseHelper databaseHelper;
+
+    // Stores selected image path as text in SQLite
+    String selectedImageUri = "";
+
+    // Image picker launcher for selecting image from phone gallery
+    ActivityResultLauncher<String> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null) {
+                    selectedImageUri = uri.toString();
+                    imgSelectedItem.setImageURI(uri);
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +57,8 @@ public class CreateAdvertActivity extends AppCompatActivity {
         editDate = findViewById(R.id.editDate);
         editLocation = findViewById(R.id.editLocation);
         btnSave = findViewById(R.id.btnSave);
+        btnChooseImage = findViewById(R.id.btnChooseImage);
+        imgSelectedItem = findViewById(R.id.imgSelectedItem);
 
         // Creating database helper object
         databaseHelper = new DatabaseHelper(this);
@@ -60,6 +82,11 @@ public class CreateAdvertActivity extends AppCompatActivity {
 
         spinnerCategory.setAdapter(adapter);
 
+        // Opens phone gallery to choose item image
+        btnChooseImage.setOnClickListener(v -> {
+            imagePickerLauncher.launch("image/*");
+        });
+
         // Save advert when button is clicked
         btnSave.setOnClickListener(v -> saveAdvert());
     }
@@ -81,7 +108,13 @@ public class CreateAdvertActivity extends AppCompatActivity {
             return;
         }
 
-        // Inserting advert into SQLite database
+        // Subtask 2 validation: image is compulsory
+        if (selectedImageUri.isEmpty()) {
+            Toast.makeText(this, "Please upload an image", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Inserting advert into SQLite database with image path
         boolean inserted = databaseHelper.insertAdvert(
                 postType,
                 category,
@@ -89,7 +122,8 @@ public class CreateAdvertActivity extends AppCompatActivity {
                 phone,
                 description,
                 date,
-                location
+                location,
+                selectedImageUri
         );
 
         if (inserted) {
