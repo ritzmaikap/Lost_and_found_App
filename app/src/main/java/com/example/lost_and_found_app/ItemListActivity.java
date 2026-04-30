@@ -79,9 +79,10 @@ public class ItemListActivity extends AppCompatActivity {
                 String postType = cursor.getString(cursor.getColumnIndexOrThrow("post_type"));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
                 String category = cursor.getString(cursor.getColumnIndexOrThrow("category"));
+                String timestamp = cursor.getString(cursor.getColumnIndexOrThrow("timestamp"));
 
                 itemIds.add(id);
-                itemTitles.add(postType + " " + name + " - " + category);
+                itemTitles.add(postType + " " + name + " (" + category + ")\n" + timestamp);
 
             } while (cursor.moveToNext());
 

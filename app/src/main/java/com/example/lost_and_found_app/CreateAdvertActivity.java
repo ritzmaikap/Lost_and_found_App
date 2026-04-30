@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -114,6 +117,12 @@ public class CreateAdvertActivity extends AppCompatActivity {
             return;
         }
 
+        // Auto timestamp generation (system time)
+        String timestamp = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss",
+                Locale.getDefault()
+        ).format(new Date());
+
         // Inserting advert into SQLite database with image path
         boolean inserted = databaseHelper.insertAdvert(
                 postType,
@@ -123,7 +132,8 @@ public class CreateAdvertActivity extends AppCompatActivity {
                 description,
                 date,
                 location,
-                selectedImageUri
+                selectedImageUri,
+                timestamp   // NEW
         );
 
         if (inserted) {
