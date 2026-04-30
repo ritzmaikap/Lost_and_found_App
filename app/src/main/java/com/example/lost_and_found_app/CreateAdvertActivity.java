@@ -42,6 +42,12 @@ public class CreateAdvertActivity extends AppCompatActivity {
                 if (uri != null) {
                     selectedImageUri = uri.toString();
                     imgSelectedItem.setImageURI(uri);
+
+                    // VERY IMPORTANT: persist permission
+                    getContentResolver().takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
                 }
             });
 

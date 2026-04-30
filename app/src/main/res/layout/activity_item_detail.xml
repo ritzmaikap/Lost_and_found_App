@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Detail screen based on the fourth wireframe.
-    Subtask 2 shows the uploaded image for the advert.
--->
+<!-- Detail screen that appears after clicking an item from the list -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,17 +7,25 @@
     android:padding="22dp"
     android:background="#FFFFFF">
 
-    <!-- Uploaded image for selected lost/found item -->
+    <!-- Back button to return to item list -->
+    <Button
+        android:id="@+id/btnBackToList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BACK" />
+
+    <!-- Uploaded image of lost/found item -->
     <ImageView
         android:id="@+id/imgItemDetail"
         android:layout_width="match_parent"
-        android:layout_height="220dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="12dp"
         android:layout_marginBottom="16dp"
         android:background="#DDDDDD"
         android:scaleType="centerCrop"
         android:contentDescription="Uploaded item image" />
 
-    <!-- Full advert details -->
+    <!-- Item details similar to the remove-item wireframe -->
     <TextView
         android:id="@+id/txtItemDetails"
         android:layout_width="match_parent"
@@ -29,7 +34,7 @@
         android:textSize="18sp"
         android:text="Item details will appear here" />
 
-    <!-- Remove advert button -->
+    <!-- Remove button -->
     <Button
         android:id="@+id/btnRemove"
         android:layout_width="match_parent"
