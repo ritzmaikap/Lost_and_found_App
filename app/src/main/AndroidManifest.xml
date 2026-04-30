@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Lost_and_Found_App">
+        <activity android:name=".ItemDetailActivity" />
         <activity android:name=".ItemListActivity" />
         <activity android:name=".CreateAdvertActivity" />
         <activity

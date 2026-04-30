@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    List screen based on the third wireframe.
-    It displays lost and found adverts.
--->
+<!-- Screen that shows all lost and found items based on the wireframe -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,7 +7,14 @@
     android:padding="18dp"
     android:background="#FFFFFF">
 
-    <!-- Screen heading -->
+    <!-- Back button to return to main screen -->
+    <Button
+        android:id="@+id/btnBackToHome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BACK" />
+
+    <!-- Screen title -->
     <TextView
         android:id="@+id/txtListTitle"
         android:layout_width="wrap_content"
@@ -21,7 +25,7 @@
         android:layout_gravity="center"
         android:layout_marginBottom="12dp" />
 
-    <!-- Shows active filter -->
+    <!-- Shows selected category filter -->
     <TextView
         android:id="@+id/txtFilterInfo"
         android:layout_width="match_parent"
@@ -34,6 +38,7 @@
     <ListView
         android:id="@+id/listItems"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
 </LinearLayout>
