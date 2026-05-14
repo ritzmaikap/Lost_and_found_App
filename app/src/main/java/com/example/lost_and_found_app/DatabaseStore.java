@@ -7,24 +7,28 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /*
-    DatabaseHelper manages the SQLite database.
-    Subtask 1 added category filtering.
-    Subtask 2 adds image storage using image URI text.
+    DatabaseStore manages the SQLite database for the Lost and Found app.
+
+    New geo feature:
+    - latitude and longitude are now saved for every advert.
+    - This helps us show each lost/found item on Google Maps.
+    - It also helps us calculate radius-based search.
 */
-public class DatabaseHelper extends SQLiteOpenHelper {
+public class DatabaseStore extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "LostFound.db";
 
-    // Version increased because image_uri column is added
-    private static final int DATABASE_VERSION = 3;
+    // Version increased because latitude and longitude columns are added.
+    // Important: increasing version recreates the database during development.
+    private static final int DATABASE_VERSION = 4;
 
     private static final String TABLE_NAME = "adverts";
 
-    public DatabaseHelper(Context context) {
+    public DatabaseStore(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    // Creating the adverts table
+    // This method creates the adverts table.
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + TABLE_NAME + " (" +
@@ -34,25 +38,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "name TEXT, " +
                 "phone TEXT, " +
                 "description TEXT, " +
-                "date TEXT, " + // existing (user input)
+                "date TEXT, " +
                 "location TEXT, " +
+                "latitude REAL, " +       // New column for map latitude
+                "longitude REAL, " +      // New column for map longitude
                 "image_uri TEXT, " +
-                "timestamp TEXT)";   // NEW
+                "timestamp TEXT)";
 
         db.execSQL(createTable);
     }
 
-    // Recreating table if database version changes
+    // During development, the old table is removed and recreated when version changes.
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
     }
 
-    // Insert a new lost/found advert with image URI
+    // This method inserts a new advert into SQLite.
+    // latitude and longitude are also stored so the item can be shown on map.
     public boolean insertAdvert(String postType, String category, String name,
                                 String phone, String description,
                                 String date, String location,
+                                double latitude, double longitude,
                                 String imageUri, String timestamp) {
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -65,15 +73,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("description", description);
         values.put("date", date);
         values.put("location", location);
+        values.put("latitude", latitude);
+        values.put("longitude", longitude);
         values.put("image_uri", imageUri);
-        values.put("timestamp", timestamp); // NEW
+        values.put("timestamp", timestamp);
 
         long result = db.insert(TABLE_NAME, null, values);
 
         return result != -1;
     }
 
-    // Get all adverts without category filter
+    // This gets all adverts for list screen and map screen.
     public Cursor getAllAdverts() {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -83,7 +93,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // Get adverts filtered by category
+    // This gets adverts by category.
     public Cursor getAdvertsByCategory(String category) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -93,7 +103,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // Get a single advert using id
+    // This gets one advert by id.
     public Cursor getAdvertById(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -103,7 +113,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // Delete advert after item is returned to owner
+    // This deletes one advert.
     public boolean deleteAdvert(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
 

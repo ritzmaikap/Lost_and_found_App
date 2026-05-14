@@ -25,7 +25,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     ImageView imgItemDetail;
     Button btnRemove, btnBackToList;
 
-    DatabaseHelper databaseHelper;
+    DatabaseStore databaseStore;
     int advertId;
 
     @Override
@@ -39,9 +39,9 @@ public class ItemDetailActivity extends AppCompatActivity {
         btnRemove = findViewById(R.id.btnRemove);
         btnBackToList = findViewById(R.id.btnBackToList);
 
-        databaseHelper = new DatabaseHelper(this);
+        databaseStore = new DatabaseStore(this);
 
-        // Getting selected advert id from ItemListActivity
+        // Getting selected advert id from ItemListingActivity
         advertId = getIntent().getIntExtra("advert_id", -1);
 
         if (advertId == -1) {
@@ -63,7 +63,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         Cursor cursor = null;
 
         try {
-            cursor = databaseHelper.getAdvertById(advertId);
+            cursor = databaseStore.getAdvertById(advertId);
 
             if (cursor == null || !cursor.moveToFirst()) {
                 Toast.makeText(this, "Item not found", Toast.LENGTH_SHORT).show();
@@ -128,7 +128,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private void removeAdvert() {
         try {
-            boolean deleted = databaseHelper.deleteAdvert(advertId);
+            boolean deleted = databaseStore.deleteAdvert(advertId);
 
             if (deleted) {
                 Toast.makeText(this, "Advert removed successfully", Toast.LENGTH_SHORT).show();
