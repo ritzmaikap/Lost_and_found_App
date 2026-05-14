@@ -1,7 +1,10 @@
 package com.example.lost_and_found_app;
 
+import android.Manifest;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -10,44 +13,67 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 /*
-    This activity allows the user to create a lost or found advert.
-    Subtask 1 added category selection.
-    Subtask 2 requires the user to upload an image before saving the advert.
+    This activity is used to create a lost or found advert.
+
+    New geo feature:
+    - User can type a location manually.
+    - User can also click GET CURRENT LOCATION.
+    - Latitude and longitude are saved with the advert.
 */
 public class CreateAdvertActivity extends AppCompatActivity {
 
     RadioButton radioLost, radioFound;
     Spinner spinnerCategory;
     EditText editName, editPhone, editDescription, editDate, editLocation;
-    Button btnSave, btnChooseImage;
+    Button btnSave, btnChooseImage, btnGetCurrentLocation;
     ImageView imgSelectedItem;
 
-    DatabaseHelper databaseHelper;
+    DatabaseStore databaseStore;
+    FusedLocationProviderClient fusedLocationClient;
 
-    // Stores selected image path as text in SQLite
     String selectedImageUri = "";
 
-    // Image picker launcher for selecting image from phone gallery
+    // These variables store the selected location coordinates.
+    double selectedLatitude = 0.0;
+    double selectedLongitude = 0.0;
+
+    // This checks whether a valid location has been selected.
+    boolean locationSelected = false;
+
     ActivityResultLauncher<String> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
                 if (uri != null) {
                     selectedImageUri = uri.toString();
                     imgSelectedItem.setImageURI(uri);
 
-                    // VERY IMPORTANT: persist permission
                     getContentResolver().takePersistableUriPermission(
                             uri,
                             Intent.FLAG_GRANT_READ_URI_PERMISSION
                     );
+                }
+            });
+
+    ActivityResultLauncher<String> locationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    getCurrentLocation();
+                } else {
+                    Toast.makeText(this, "Location permission is needed", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -56,7 +82,6 @@ public class CreateAdvertActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_advert);
 
-        // Linking XML views with Java variables
         radioLost = findViewById(R.id.radioLost);
         radioFound = findViewById(R.id.radioFound);
         spinnerCategory = findViewById(R.id.spinnerCategory);
@@ -67,12 +92,14 @@ public class CreateAdvertActivity extends AppCompatActivity {
         editLocation = findViewById(R.id.editLocation);
         btnSave = findViewById(R.id.btnSave);
         btnChooseImage = findViewById(R.id.btnChooseImage);
+        btnGetCurrentLocation = findViewById(R.id.btnGetCurrentLocation);
         imgSelectedItem = findViewById(R.id.imgSelectedItem);
 
-        // Creating database helper object
-        databaseHelper = new DatabaseHelper(this);
+        databaseStore = new DatabaseStore(this);
 
-        // Category list for adverts
+        // This helps us get the phone's current location.
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         String[] categories = {
                 "Electronics",
                 "Pets",
@@ -82,7 +109,6 @@ public class CreateAdvertActivity extends AppCompatActivity {
                 "Other"
         };
 
-        // Setting category spinner values
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_dropdown_item,
@@ -91,17 +117,87 @@ public class CreateAdvertActivity extends AppCompatActivity {
 
         spinnerCategory.setAdapter(adapter);
 
-        // Opens phone gallery to choose item image
-        btnChooseImage.setOnClickListener(v -> {
-            imagePickerLauncher.launch("image/*");
-        });
+        btnChooseImage.setOnClickListener(v -> imagePickerLauncher.launch("image/*"));
 
-        // Save advert when button is clicked
+        btnGetCurrentLocation.setOnClickListener(v -> checkLocationPermission());
+
         btnSave.setOnClickListener(v -> saveAdvert());
     }
 
+    private void checkLocationPermission() {
+        // Runtime permission is needed for current location.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            getCurrentLocation();
+        } else {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    private void getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                selectedLatitude = location.getLatitude();
+                selectedLongitude = location.getLongitude();
+                locationSelected = true;
+
+                // Convert latitude and longitude into readable address.
+                String addressText = getAddressFromCoordinates(selectedLatitude, selectedLongitude);
+                editLocation.setText(addressText);
+
+                Toast.makeText(this, "Current location selected", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Unable to get current location. Try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String getAddressFromCoordinates(double latitude, double longitude) {
+        try {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+
+            if (addresses != null && !addresses.isEmpty()) {
+                return addresses.get(0).getAddressLine(0);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return latitude + ", " + longitude;
+    }
+
+    private boolean convertTypedLocationToCoordinates(String locationText) {
+        try {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+            List<Address> addresses = geocoder.getFromLocationName(locationText, 1);
+
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+
+                selectedLatitude = address.getLatitude();
+                selectedLongitude = address.getLongitude();
+                locationSelected = true;
+
+                return true;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     private void saveAdvert() {
-        // Getting values from form fields
         String postType = radioLost.isChecked() ? "Lost" : "Found";
         String category = spinnerCategory.getSelectedItem().toString();
         String name = editName.getText().toString().trim();
@@ -110,27 +206,33 @@ public class CreateAdvertActivity extends AppCompatActivity {
         String date = editDate.getText().toString().trim();
         String location = editLocation.getText().toString().trim();
 
-        // Simple validation to avoid empty adverts
         if (name.isEmpty() || phone.isEmpty() || description.isEmpty()
                 || date.isEmpty() || location.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Subtask 2 validation: image is compulsory
         if (selectedImageUri.isEmpty()) {
             Toast.makeText(this, "Please upload an image", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Auto timestamp generation (system time)
+        // If user typed the location manually, convert it into latitude and longitude.
+        if (!locationSelected) {
+            boolean converted = convertTypedLocationToCoordinates(location);
+
+            if (!converted) {
+                Toast.makeText(this, "Please enter a valid location", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         String timestamp = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss",
                 Locale.getDefault()
         ).format(new Date());
 
-        // Inserting advert into SQLite database with image path
-        boolean inserted = databaseHelper.insertAdvert(
+        boolean inserted = databaseStore.insertAdvert(
                 postType,
                 category,
                 name,
@@ -138,8 +240,10 @@ public class CreateAdvertActivity extends AppCompatActivity {
                 description,
                 date,
                 location,
+                selectedLatitude,
+                selectedLongitude,
                 selectedImageUri,
-                timestamp   // NEW
+                timestamp
         );
 
         if (inserted) {

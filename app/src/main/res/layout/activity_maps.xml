@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    This screen has:
+    1. Back button
+    2. Search box to search location
+    3. Search button
+    4. Google Map
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Back button to return to home screen -->
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="BACK" />
+
+    <!-- Location search input -->
+    <EditText
+        android:id="@+id/editSearchLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search location"
+        android:padding="12dp"
+        android:singleLine="true" />
+
+    <!-- Button to search typed location -->
+    <Button
+        android:id="@+id/btnSearchLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SEARCH LOCATION" />
+
+    <!-- Google map area -->
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

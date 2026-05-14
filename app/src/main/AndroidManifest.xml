@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,8 +16,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lost_and_Found_App">
         <activity android:name=".ItemDetailActivity" />
-        <activity android:name=".ItemListActivity" />
+        <activity android:name=".ItemListingActivity" />
         <activity android:name=".CreateAdvertActivity" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyC-baLTZamWzO5Osv97nn59xvMy0p6KMjM" />
+
+        <activity android:name=".MapsActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

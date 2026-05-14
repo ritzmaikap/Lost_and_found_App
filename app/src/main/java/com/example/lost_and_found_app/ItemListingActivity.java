@@ -20,13 +20,13 @@ import java.util.Locale;
     This screen shows all lost and found adverts.
     When an item is clicked, it opens the detail screen with remove option.
 */
-public class ItemListActivity extends AppCompatActivity {
+public class ItemListingActivity extends AppCompatActivity {
 
     TextView txtFilterInfo;
     ListView listItems;
     Button btnBackToHome;
 
-    DatabaseHelper databaseHelper;
+    DatabaseStore databaseStore;
 
     ArrayList<String> itemTitles;
     ArrayList<Integer> itemIds;
@@ -36,14 +36,14 @@ public class ItemListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_item_list);
+        setContentView(R.layout.activity_item_listing);
 
         // Linking XML views with Java variables
         txtFilterInfo = findViewById(R.id.txtFilterInfo);
         listItems = findViewById(R.id.listItems);
         btnBackToHome = findViewById(R.id.btnBackToHome);
 
-        databaseHelper = new DatabaseHelper(this);
+        databaseStore = new DatabaseStore(this);
 
         itemTitles = new ArrayList<>();
         itemIds = new ArrayList<>();
@@ -74,7 +74,7 @@ public class ItemListActivity extends AppCompatActivity {
                 return;
             }
 
-            Intent intent = new Intent(ItemListActivity.this, ItemDetailActivity.class);
+            Intent intent = new Intent(ItemListingActivity.this, ItemDetailActivity.class);
             intent.putExtra("advert_id", itemIds.get(position));
             startActivity(intent);
         });
@@ -103,9 +103,9 @@ public class ItemListActivity extends AppCompatActivity {
 
         try {
             if (categoryFilter.equals("All Categories")) {
-                cursor = databaseHelper.getAllAdverts();
+                cursor = databaseStore.getAllAdverts();
             } else {
-                cursor = databaseHelper.getAdvertsByCategory(categoryFilter);
+                cursor = databaseStore.getAdvertsByCategory(categoryFilter);
             }
 
             if (cursor != null && cursor.moveToFirst()) {
